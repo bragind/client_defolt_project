@@ -1,4 +1,4 @@
-# Credit Scoring Model
+# Client Defolt Model
 
 Этот проект реализует систему для автоматизированной разработки и обслуживания PD-модели (Probability of Default) для кредитного отдела банка.
 
