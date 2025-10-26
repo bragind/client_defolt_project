@@ -1,0 +1,18 @@
+stages:
+  prepare:
+    cmd: python src/data/make_dataset.py
+    deps:
+      - data/raw/UCI_Credit_Card.csv
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - expectations/dataset_suite.json
+
+  train:
+    cmd: python src/models/train.py
+    deps:
+      - data/processed/train.csv
+      - expectations/dataset_suite.json
+    outs:
+      - models/model.pkl
+      - models/mlflow_run_id.txt
