@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Client defolt ptojeckt
+=======
+# Client Defolt Model
+>>>>>>> 08230c3d55b639370efd9c5ca1fc406a36aac068
 
 End-to-end ML pipeline for predicting credit card default probability.
 
@@ -18,4 +22,13 @@ This project implements a complete MLops pipeline for predicting the probability
 - **CI/CD**: GitHub Actions for automated testing
 - **Containerization**: Docker for deployment
 
+<<<<<<< HEAD
 ## Project Structure
+=======
+## Требования
+
+- Python 3.9+
+- Git
+- DVC
+- MLflow
+>>>>>>> 08230c3d55b639370efd9c5ca1fc406a36aac068
