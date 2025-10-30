@@ -1,28 +1,21 @@
-# Credit Scoring Model
+# Client defolt ptojeckt
 
-Этот проект реализует систему для автоматизированной разработки и обслуживания PD-модели (Probability of Default) для кредитного отдела банка.
+End-to-end ML pipeline for predicting credit card default probability.
 
-## Структура проекта
+## Project Overview
 
-- `data/`: исходные и обработанные данные.
-- `src/`: основной код проекта.
-- `notebooks/`: Jupyter-ноутбуки для EDA и экспериментов.
-- `models/`: сохраненные модели.
-- `tests/`: unit-тесты.
-- `Dockerfile`: для контейнеризации.
-- `requirements.txt`: зависимости.
-- `.github/workflows/ci-cd.yml`: CI/CD пайплайн.
+This project implements a complete MLops pipeline for predicting the probability of credit card default using the [Default of Credit Card Clients Dataset](https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients) from UCI Machine Learning Repository.
 
-## Инструкция по запуску
+## Features
 
-1. Установите зависимости: `pip install -r requirements.txt`
-2. Запустите подготовку данных: `python src/data/make_dataset.py`
-3. Запустите обучение: `python src/models/train.py`
-4. Запустите API: `uvicorn src.api.app:app --reload`
+- **Data Validation**: Great Expectations for data quality checks
+- **Feature Engineering**: Automated feature creation and transformation
+- **ML Pipeline**: Sklearn pipelines with preprocessing and modeling
+- **Experiment Tracking**: MLflow for experiment management
+- **Version Control**: DVC for data and model versioning
+- **REST API**: FastAPI for model serving
+- **Monitoring**: Data drift detection
+- **CI/CD**: GitHub Actions for automated testing
+- **Containerization**: Docker for deployment
 
-## Требования
-
-- Python 3.9+
-- Git
-- DVC
-- MLflow
+## Project Structure

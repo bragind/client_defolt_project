@@ -1,18 +1,26 @@
 stages:
   prepare:
-    cmd: python src/data/make_dataset.py
+    cmd: python src/data/preprocess.py
     deps:
-      - data/raw/UCI_Credit_Card.csv
+      - src/data/preprocess.py
+      - data/raw/default_of_credit_card_clients.csv
     outs:
       - data/processed/train.csv
       - data/processed/test.csv
-      - expectations/dataset_suite.json
+    metrics:
+      - reports/data_metrics.json:
+          cache: false
 
   train:
     cmd: python src/models/train.py
     deps:
+      - src/models/train.py
       - data/processed/train.csv
-      - expectations/dataset_suite.json
+    params:
+      - train.model_type
+      - train.random_state
     outs:
-      - models/model.pkl
-      - models/mlflow_run_id.txt
+      - models/best_model.pkl
+    metrics:
+      - reports/train_metrics.json:
+          cache: false

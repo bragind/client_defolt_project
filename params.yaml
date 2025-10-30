@@ -1,0 +1,19 @@
+prepare:
+  test_size: 0.2
+  random_state: 42
+
+train:
+  model_type: "random_forest"
+  test_size: 0.2
+  random_state: 42
+  hyperparameters:
+    random_forest:
+      n_estimators: [100, 200]
+      max_depth: [10, 15, 20]
+    logistic_regression:
+      C: [0.1, 1.0, 10.0]
+      max_iter: [1000]
+
+api:
+  host: "0.0.0.0"
+  port: 8000
