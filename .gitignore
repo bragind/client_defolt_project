@@ -38,3 +38,7 @@ reports/training_metrics.json
 # Models (except best_model.pkl which is tracked by DVC)
 models/*.pkl
 !models/best_model.pkl
+# Data files managed by DVC
+data/processed/train.csv
+data/processed/test.csv
+models/best_model.pkl

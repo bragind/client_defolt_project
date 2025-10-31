@@ -1,0 +1,50 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/data/preprocess.py
+    deps:
+    - path: data/raw/default_of_credit_card_clients.csv
+      hash: md5
+      md5: 07d612ca378f354c0010fff105d9cdde
+      size: 107469
+    - path: src/data/preprocess.py
+      hash: md5
+      md5: 18a4c1748411d5fcbe25332c50e1fadc
+      size: 11296
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: dc54c9002c0770bf2d547ac9fc441ef7
+      size: 51043
+    - path: data/processed/train.csv
+      hash: md5
+      md5: e58a12c82efa6d23051b503ec79243a4
+      size: 203834
+    - path: reports/data_metrics.json
+      hash: md5
+      md5: eac9acdd11b183db0a69758ba92b7e04
+      size: 395
+  train:
+    cmd: python src/models/train.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: e58a12c82efa6d23051b503ec79243a4
+      size: 203834
+    - path: src/models/train.py
+      hash: md5
+      md5: d69107e624af69fb89a240d1387cdb26
+      size: 12321
+    params:
+      params.yaml:
+        train.model_type: random_forest
+        train.random_state: 42
+    outs:
+    - path: models/best_model.pkl
+      hash: md5
+      md5: 5f58ae02bdbdc0cd6540fda9515cd53e
+      size: 7143
+    - path: reports/train_metrics.json
+      hash: md5
+      md5: d80098e2e491bcabe815ba6729f213a6
+      size: 1385
