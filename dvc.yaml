@@ -1,4 +1,4 @@
-stages:
+﻿stages:
   prepare:
     cmd: python src/data/preprocess.py
     deps:
@@ -8,8 +8,7 @@ stages:
       - data/processed/train.csv
       - data/processed/test.csv
     metrics:
-      - reports/data_metrics.json:
-          cache: false
+      - reports/data_metrics.json
 
   train:
     cmd: python src/models/train.py
@@ -22,5 +21,4 @@ stages:
     outs:
       - models/best_model.pkl
     metrics:
-      - reports/train_metrics.json:
-          cache: false
+      - reports/train_metrics.json

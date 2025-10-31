@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import os
 import sys
+import json
 
 def load_data(file_path):
     """Загрузка исходных данных"""
@@ -139,6 +140,35 @@ def validate_dataframe(df):
     
     return df
 
+def save_data_metrics(train_df, test_df, target_col):
+    """Сохранение метрик данных в JSON файл"""
+    # Расчет метрик данных
+    data_metrics = {
+        "original_rows": len(train_df) + len(test_df),
+        "train_rows": len(train_df),
+        "test_rows": len(test_df),
+        "features_count": len(train_df.columns) - 1,  # минус целевая переменная
+        "train_target_distribution": {
+            "class_0": int(train_df[target_col].value_counts().get(0, 0)),
+            "class_1": int(train_df[target_col].value_counts().get(1, 0))
+        },
+        "test_target_distribution": {
+            "class_0": int(test_df[target_col].value_counts().get(0, 0)),
+            "class_1": int(test_df[target_col].value_counts().get(1, 0))
+        },
+        "class_ratio_train": float(train_df[target_col].mean()),
+        "class_ratio_test": float(test_df[target_col].mean()),
+        "train_memory_mb": float(train_df.memory_usage(deep=True).sum() / 1024 / 1024),
+        "test_memory_mb": float(test_df.memory_usage(deep=True).sum() / 1024 / 1024)
+    }
+    
+    # Сохранение метрик в JSON файл
+    with open('reports/data_metrics.json', 'w') as f:
+        json.dump(data_metrics, f, indent=2)
+    
+    print("Data metrics saved to reports/data_metrics.json")
+    return data_metrics
+
 def main():
     """Основная функция подготовки данных"""
     print("Starting data preprocessing...")
@@ -214,12 +244,24 @@ def main():
     
     print(f"Train data shape: {train_df.shape}")
     print(f"Test data shape: {test_df.shape}")
-    print("Data preprocessing completed successfully!")
     
     # Вывод информации о данных
     print(f"\nTarget distribution:")
     print(f"Train: {y_train.value_counts().to_dict()}")
     print(f"Test: {y_test.value_counts().to_dict()}")
+    
+    # Сохранение метрик данных
+    data_metrics = save_data_metrics(train_df, test_df, target_col)
+    
+    print("\nData metrics summary:")
+    print(f"Total samples: {data_metrics['original_rows']}")
+    print(f"Train samples: {data_metrics['train_rows']}")
+    print(f"Test samples: {data_metrics['test_rows']}")
+    print(f"Features count: {data_metrics['features_count']}")
+    print(f"Train class ratio: {data_metrics['class_ratio_train']:.3f}")
+    print(f"Test class ratio: {data_metrics['class_ratio_test']:.3f}")
+    
+    print("Data preprocessing completed successfully!")
 
 if __name__ == "__main__":
     main()

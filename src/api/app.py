@@ -7,10 +7,8 @@ from typing import List, Optional
 import os
 import sys
 
-# Добавляем путь к src для импорта модулей
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-from models.pipeline import get_feature_names
+# Добавляем путь к корню проекта для импортов
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 app = FastAPI(
     title="Credit Default Prediction API",
@@ -67,6 +65,7 @@ def load_model():
             print("Model loaded successfully")
         else:
             print(f"Model file not found at {model_path}")
+            print("Please train the model first: python src/models/train.py")
     except Exception as e:
         print(f"Error loading model: {e}")
 
@@ -102,6 +101,9 @@ def create_features_from_input(df):
     
     # Создание отношения кредитного лимита к общим счетам
     df['CREDIT_UTILIZATION'] = df['BILL_AMT_TOTAL'] / (df['LIMIT_BAL'] + 1)
+    
+    # Заполняем возможные NaN значения
+    df = df.fillna(0)
     
     return df
 
@@ -221,7 +223,6 @@ async def get_model_info():
         model_info = {
             "model_type": type(model.named_steps['classifier']).__name__,
             "model_version": "1.0.0",
-            "features_used": get_feature_names()[0] + get_feature_names()[1] + get_feature_names()[2],
             "pipeline_steps": list(model.named_steps.keys())
         }
         

@@ -8,7 +8,6 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import SelectFromModel
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,22 +65,11 @@ def create_pipeline(model_type='random_forest', **model_params):
     else:
         raise ValueError(f"Unknown model type: {model_type}")
     
-    # Для Random Forest убираем feature selection, т.к. он сам делает selection
-    if model_type == 'random_forest':
-        pipeline = Pipeline(steps=[
-            ('preprocessor', preprocessor),
-            ('classifier', model)
-        ])
-    else:
-        # Для Logistic Regression оставляем feature selection
-        pipeline = Pipeline(steps=[
-            ('preprocessor', preprocessor),
-            ('feature_selection', SelectFromModel(
-                RandomForestClassifier(n_estimators=100, random_state=42),
-                threshold='median'
-            )),
-            ('classifier', model)
-        ])
+    # Упрощенный pipeline БЕЗ feature selection
+    pipeline = Pipeline(steps=[
+        ('preprocessor', preprocessor),
+        ('classifier', model)
+    ])
     
     return pipeline
 
@@ -130,60 +118,34 @@ def plot_roc_curve(y_true, y_proba, save_path=None):
     
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"ROC curve saved to: {save_path}")
     
     return plt
 
-def plot_feature_importance(pipeline, feature_names, save_path=None):
-    """Визуализация важности признаков"""
-    classifier = pipeline.named_steps['classifier']
+def save_train_metrics(best_model_name, best_roc_auc, results):
+    """Сохранение метрик обучения в JSON файл"""
+    train_metrics = {
+        "best_model": best_model_name,
+        "best_roc_auc": float(best_roc_auc),
+        "all_models": {}
+    }
     
-    if hasattr(classifier, 'feature_importances_'):
-        # Для Random Forest без feature selection
-        if 'feature_selection' not in pipeline.named_steps:
-            importances = classifier.feature_importances_
-            
-            # Сортируем по важности
-            indices = np.argsort(importances)[::-1]
-            
-            plt.figure(figsize=(12, 8))
-            plt.title("Feature Importances (Random Forest)")
-            plt.bar(range(min(20, len(importances))), 
-                    importances[indices][:20])
-            plt.xticks(range(min(20, len(importances))), 
-                      [feature_names[i] for i in indices[:20]], rotation=45)
-            plt.tight_layout()
-            
-            if save_path:
-                plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            
-            return plt
-        
-        # Для моделей с feature selection
-        elif hasattr(pipeline.named_steps['feature_selection'], 'get_support'):
-            importances = classifier.feature_importances_
-            
-            # Получаем выбранные признаки после feature selection
-            selected_mask = pipeline.named_steps['feature_selection'].get_support()
-            selected_features = [feature_names[i] for i in range(len(feature_names)) if selected_mask[i]]
-            selected_importances = importances[selected_mask]
-            
-            # Сортируем по важности
-            indices = np.argsort(selected_importances)[::-1]
-            
-            plt.figure(figsize=(12, 8))
-            plt.title("Feature Importances (After Selection)")
-            plt.bar(range(min(20, len(selected_importances))), 
-                    selected_importances[indices][:20])
-            plt.xticks(range(min(20, len(selected_importances))), 
-                      [selected_features[i] for i in indices[:20]], rotation=45)
-            plt.tight_layout()
-            
-            if save_path:
-                plt.savefig(save_path, dpi=300, bbox_inches='tight')
-            
-            return plt
+    for model_name, metrics in results.items():
+        train_metrics["all_models"][model_name] = {
+            "roc_auc": float(metrics["roc_auc"]),
+            "precision": float(metrics["precision"]),
+            "recall": float(metrics["recall"]),
+            "f1_score": float(metrics["f1_score"]),
+            "accuracy": float(metrics["accuracy"])
+        }
     
-    return None
+    # Сохранение метрик в JSON файл
+    os.makedirs('reports', exist_ok=True)
+    with open('reports/train_metrics.json', 'w') as f:
+        json.dump(train_metrics, f, indent=2)
+    
+    print("Training metrics saved to reports/train_metrics.json")
+    return train_metrics
 
 def train_model():
     """Основная функция обучения"""
@@ -289,15 +251,6 @@ def train_model():
                 mlflow.log_artifact(f'plots/roc_curve_{i}.png')
                 roc_plot.close()
                 
-                # Визуализация важности признаков
-                feature_names = X_train.columns.tolist()
-                feature_importance_plot = plot_feature_importance(
-                    pipeline, feature_names, f'plots/feature_importance_{i}.png'
-                )
-                if feature_importance_plot:
-                    mlflow.log_artifact(f'plots/feature_importance_{i}.png')
-                    feature_importance_plot.close()
-                
                 # Логирование модели
                 mlflow.sklearn.log_model(pipeline, "model")
                 
@@ -323,14 +276,8 @@ def train_model():
         joblib.dump(best_model, 'models/best_model.pkl')
         print(f"\nBest model saved: {best_model_name} with ROC-AUC: {best_score:.4f}")
         
-        # Сохранение метрик обучения
-        with open('reports/training_metrics.json', 'w') as f:
-            json.dump({
-                'best_model': best_model_name,
-                'best_run_id': best_run_id,
-                'best_score': best_score,
-                'all_metrics': training_metrics
-            }, f, indent=2)
+        # Сохранение метрик обучения в файл train_metrics.json
+        save_train_metrics(best_model_name, best_score, training_metrics)
         
         print("Training completed successfully!")
         
@@ -350,6 +297,10 @@ def train_model():
         print(f"BEST MODEL: {best_model_name}")
         print(f"BEST ROC-AUC: {best_score:.4f}")
         
+        # Информация о MLflow
+        print(f"\nMLflow UI: mlflow ui --backend-store-uri sqlite:///mlflow.db")
+        print(f"Best model run ID: {best_run_id}")
+        
     else:
         print("No model was successfully trained!")
         return None
@@ -358,4 +309,3 @@ def train_model():
 
 if __name__ == "__main__":
     train_model()
-    

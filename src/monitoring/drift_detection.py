@@ -44,7 +44,7 @@ class DataDriftDetector:
         
         # Расчет PSI
         psi = np.sum((expected_percents - actual_percents) * np.log(expected_percents / actual_percents))
-        return psi
+        return float(psi)  # Конвертируем в Python float
     
     def detect_numerical_drift(self, current_data: pd.DataFrame) -> Dict[str, float]:
         """Обнаружение дрифта для числовых признаков"""
@@ -65,10 +65,10 @@ class DataDriftDetector:
                 )
                 
                 drift_scores[col] = {
-                    'ks_statistic': ks_stat,
-                    'ks_pvalue': ks_pvalue,
+                    'ks_statistic': float(ks_stat),  # Конвертируем в Python float
+                    'ks_pvalue': float(ks_pvalue),   # Конвертируем в Python float
                     'psi': psi,
-                    'drift_detected': ks_pvalue < 0.05 or psi > 0.1
+                    'drift_detected': bool(ks_pvalue < 0.05 or psi > 0.1)  # Конвертируем в Python bool
                 }
         
         return drift_scores
@@ -94,9 +94,9 @@ class DataDriftDetector:
                 try:
                     chi2, p_value, _, _ = chi2_contingency([ref_vector, curr_vector])
                     drift_scores[col] = {
-                        'chi2_statistic': chi2,
-                        'p_value': p_value,
-                        'drift_detected': p_value < 0.05
+                        'chi2_statistic': float(chi2) if chi2 is not None else None,  # Конвертируем
+                        'p_value': float(p_value) if p_value is not None else None,   # Конвертируем
+                        'drift_detected': bool(p_value < 0.05)  # Конвертируем в Python bool
                     }
                 except:
                     drift_scores[col] = {
@@ -125,19 +125,37 @@ class DataDriftDetector:
             'numerical_drift': numerical_drift,
             'categorical_drift': categorical_drift,
             'summary': {
-                'total_features': total_features,
-                'drifted_features': drifted_features,
-                'drift_ratio': drift_ratio,
-                'overall_drift_detected': drift_ratio > 0.1  # Порог 10%
+                'total_features': int(total_features),  # Конвертируем в Python int
+                'drifted_features': int(drifted_features),  # Конвертируем в Python int
+                'drift_ratio': float(drift_ratio),  # Конвертируем в Python float
+                'overall_drift_detected': bool(drift_ratio > 0.1)  # Конвертируем в Python bool
             }
         }
+
+def convert_numpy_types(obj):
+    """Рекурсивно конвертирует NumPy типы в нативные Python типы"""
+    if isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(element) for element in obj]
+    elif isinstance(obj, (np.integer, np.int32, np.int64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    else:
+        return obj
 
 def monitor_prediction_drift(api_url: str, test_data_path: str, n_samples: int = 1000):
     """Мониторинг дрифта предсказаний"""
     
     # Загрузка тестовых данных
     test_data = pd.read_csv(test_data_path)
-    sample_data = test_data.sample(min(n_samples, len(test_data)))
+    sample_size = min(n_samples, len(test_data))
+    sample_data = test_data.sample(sample_size)
     
     # Получение предсказаний от API
     predictions = []
@@ -145,14 +163,18 @@ def monitor_prediction_drift(api_url: str, test_data_path: str, n_samples: int =
     for _, row in sample_data.iterrows():
         try:
             # Подготовка данных для API
-            payload = row.drop('default_payment_next_month').to_dict()
+            # Проверяем наличие целевой переменной
+            if 'default_payment_next_month' in row:
+                payload = row.drop('default_payment_next_month').to_dict()
+            else:
+                payload = row.to_dict()
             
             # Отправка запроса к API
             response = requests.post(f"{api_url}/predict", json=payload, timeout=10)
             
             if response.status_code == 200:
                 result = response.json()
-                predictions.append(result['default_probability'])
+                predictions.append(result.get('default_probability', np.nan))
             else:
                 print(f"API request failed: {response.status_code}")
                 predictions.append(np.nan)
@@ -167,11 +189,12 @@ def monitor_prediction_drift(api_url: str, test_data_path: str, n_samples: int =
     if len(successful_predictions) > 0:
         # Расчет статистик предсказаний
         prediction_stats = {
-            'mean': np.mean(successful_predictions),
-            'std': np.std(successful_predictions),
-            'min': np.min(successful_predictions),
-            'max': np.max(successful_predictions),
-            'drift_detected': np.mean(successful_predictions) > 0.3  # Пример порога
+            'mean': float(np.mean(successful_predictions)),
+            'std': float(np.std(successful_predictions)),
+            'min': float(np.min(successful_predictions)),
+            'max': float(np.max(successful_predictions)),
+            'n_predictions': len(successful_predictions),
+            'drift_detected': bool(np.mean(successful_predictions) > 0.3)  # Пример порога
         }
         
         return prediction_stats
@@ -182,40 +205,61 @@ def main():
     """Основная функция мониторинга дрифта"""
     print("Starting drift monitoring...")
     
-    # Загрузка reference данных (тренировочные)
-    reference_data = pd.read_csv('data/processed/train.csv')
-    
-    # Загрузка current данных (имитация новых данных)
-    current_data = pd.read_csv('data/processed/test.csv').sample(1000)
-    
-    # Инициализация детектора
-    detector = DataDriftDetector(reference_data)
-    
-    # Обнаружение дрифта
-    drift_report = detector.detect_drift(current_data)
-    
-    # Мониторинг дрифта предсказаний (если API доступно)
     try:
-        prediction_drift = monitor_prediction_drift(
-            "http://localhost:8000",
-            "data/processed/test.csv",
-            n_samples=100
-        )
-        drift_report['prediction_drift'] = prediction_drift
+        # Загрузка reference данных (тренировочные)
+        reference_data = pd.read_csv('data/processed/train.csv')
+        print(f"Reference data loaded: {len(reference_data)} rows")
+        
+        # Загрузка current данных (имитация новых данных)
+        current_data = pd.read_csv('data/processed/test.csv')
+        print(f"Current data loaded: {len(current_data)} rows")
+        
+        # Определение размера выборки (не больше размера данных)
+        sample_size = min(1000, len(current_data))
+        current_data_sample = current_data.sample(sample_size, random_state=42)
+        print(f"Using sample size: {sample_size}")
+        
+        # Инициализация детектора
+        detector = DataDriftDetector(reference_data)
+        
+        # Обнаружение дрифта
+        drift_report = detector.detect_drift(current_data_sample)
+        
+        # Мониторинг дрифта предсказаний (если API доступно)
+        try:
+            prediction_drift = monitor_prediction_drift(
+                "http://localhost:8000",
+                "data/processed/test.csv",
+                n_samples=100
+            )
+            drift_report['prediction_drift'] = prediction_drift
+        except Exception as e:
+            print(f"Prediction drift monitoring failed: {e}")
+            drift_report['prediction_drift'] = {'error': str(e)}
+        
+        # Конвертируем все NumPy типы в нативные Python типы
+        drift_report_serializable = convert_numpy_types(drift_report)
+        
+        # Сохранение отчета
+        os.makedirs('reports', exist_ok=True)
+        with open('reports/drift_report.json', 'w') as f:
+            json.dump(drift_report_serializable, f, indent=2, ensure_ascii=False)
+        
+        print("Drift monitoring completed!")
+        print(f"Drift ratio: {drift_report['summary']['drift_ratio']:.2%}")
+        print(f"Overall drift detected: {drift_report['summary']['overall_drift_detected']}")
+        
+        return drift_report_serializable
+    
+    except FileNotFoundError as e:
+        print(f"File not found error: {e}")
+        print("Please check that the data files exist in the specified paths")
+        return None
     except Exception as e:
-        print(f"Prediction drift monitoring failed: {e}")
-        drift_report['prediction_drift'] = {'error': str(e)}
-    
-    # Сохранение отчета
-    os.makedirs('reports', exist_ok=True)
-    with open('reports/drift_report.json', 'w') as f:
-        json.dump(drift_report, f, indent=2)
-    
-    print("Drift monitoring completed!")
-    print(f"Drift ratio: {drift_report['summary']['drift_ratio']:.2%}")
-    print(f"Overall drift detected: {drift_report['summary']['overall_drift_detected']}")
-    
-    return drift_report
+        print(f"Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 if __name__ == "__main__":
     report = main()
