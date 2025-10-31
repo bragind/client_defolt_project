@@ -1,0 +1,22 @@
+artifact_path: file:E:/Bragin/Projects/client_defolt_project/mlruns/1/models/m-d69aa7eaa2cb4f2386322add64a6c5df/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.10
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+mlflow_version: 3.5.1
+model_id: m-d69aa7eaa2cb4f2386322add64a6c5df
+model_size_bytes: 1529508
+model_uuid: m-d69aa7eaa2cb4f2386322add64a6c5df
+prompts: null
+run_id: 5ff1c3f50938467e94ed0fc072b5f1aa
+utc_time_created: '2025-10-31 07:21:29.391136'

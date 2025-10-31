@@ -40,14 +40,14 @@ def create_sample_data():
     # Создание целевой переменной с некоторой логикой
     default_proba = 1 / (1 + np.exp(-(
         0.000001 * sample_data['LIMIT_BAL'] +
-        0.1 * (sample_data['PAY_0'] > 0) +
-        0.1 * (sample_data['PAY_2'] > 0) +
-        0.05 * (sample_data['AGE'] > 50) -
-        0.2 * (sample_data['EDUCATION'] == 1) +
+        0.1 * (sample_data['PAY_0'] > 0).astype(int) +
+        0.1 * (sample_data['PAY_2'] > 0).astype(int) +
+        0.05 * (sample_data['AGE'] > 50).astype(int) -
+        0.2 * (sample_data['EDUCATION'] == 1).astype(int) +
         np.random.normal(0, 0.5, n_samples)
     )))
     
-    sample_data['default_payment_next_month'] = (default_proba > 0.5).astype(int)
+    sample_data['default.payment.next.month'] = (default_proba > 0.5).astype(int)
     
     return sample_data
 
@@ -64,10 +64,10 @@ def main():
     
     # Сохранение
     sample_data.to_csv('data/raw/default_of_credit_card_clients.csv', index=False)
-    sample_data.to_csv('data/processed/train.csv', index=False)
     
     print(f"Sample data created with shape: {sample_data.shape}")
-    print("Default rate:", sample_data['default_payment_next_month'].mean())
+    print("Default rate:", sample_data['default.payment.next.month'].mean())
+    print("Sample data saved to data/raw/default_of_credit_card_clients.csv")
 
 if __name__ == "__main__":
     main()

@@ -58,9 +58,9 @@ def create_pipeline(model_type='random_forest', **model_params):
     
     # Выбор модели
     if model_type == 'random_forest':
-        model = RandomForestClassifier(random_state=42, **model_params)
+        model = RandomForestClassifier(**model_params)
     elif model_type == 'logistic':
-        model = LogisticRegression(random_state=42, **model_params)
+        model = LogisticRegression(**model_params)
     else:
         raise ValueError(f"Unknown model type: {model_type}")
     

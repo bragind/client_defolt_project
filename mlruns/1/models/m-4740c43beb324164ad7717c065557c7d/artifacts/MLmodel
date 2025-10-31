@@ -1,0 +1,22 @@
+artifact_path: file:///H:/Mephi/2sem/client_defolt_project/mlruns/1/models/m-4740c43beb324164ad7717c065557c7d/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.7
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.2.2
+mlflow_version: 3.1.4
+model_id: m-4740c43beb324164ad7717c065557c7d
+model_size_bytes: 1380424
+model_uuid: m-4740c43beb324164ad7717c065557c7d
+prompts: null
+run_id: cd4dedf5b4e04216ac7e19843a77f4e8
+utc_time_created: '2025-10-31 18:03:29.469455'
