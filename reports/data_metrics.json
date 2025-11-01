@@ -1,0 +1,18 @@
+{
+  "original_rows": 1000,
+  "train_rows": 800,
+  "test_rows": 200,
+  "features_count": 35,
+  "train_target_distribution": {
+    "class_0": 200,
+    "class_1": 600
+  },
+  "test_target_distribution": {
+    "class_0": 50,
+    "class_1": 150
+  },
+  "class_ratio_train": 0.75,
+  "class_ratio_test": 0.75,
+  "train_memory_mb": 0.2227783203125,
+  "test_memory_mb": 0.055694580078125
+}

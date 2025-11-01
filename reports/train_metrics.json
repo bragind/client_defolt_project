@@ -1,0 +1,48 @@
+{
+  "best_model": "Logistic_Regression_C_0.1",
+  "best_roc_auc": 0.6512499999999999,
+  "all_models": {
+    "Logistic_Regression_C_0.1": {
+      "roc_auc": 0.6512499999999999,
+      "precision": 0.8041237113402062,
+      "recall": 0.65,
+      "f1_score": 0.7188940092165899,
+      "accuracy": 0.61875
+    },
+    "Logistic_Regression_C_1.0": {
+      "roc_auc": 0.6439583333333333,
+      "precision": 0.8061224489795918,
+      "recall": 0.6583333333333333,
+      "f1_score": 0.7247706422018348,
+      "accuracy": 0.625
+    },
+    "Logistic_Regression_C_10.0": {
+      "roc_auc": 0.645,
+      "precision": 0.8061224489795918,
+      "recall": 0.6583333333333333,
+      "f1_score": 0.7247706422018348,
+      "accuracy": 0.625
+    },
+    "Random_Forest_100_10": {
+      "roc_auc": 0.6410416666666667,
+      "precision": 0.7419354838709677,
+      "recall": 0.9583333333333334,
+      "f1_score": 0.8363636363636364,
+      "accuracy": 0.71875
+    },
+    "Random_Forest_200_15": {
+      "roc_auc": 0.61625,
+      "precision": 0.7531645569620253,
+      "recall": 0.9916666666666667,
+      "f1_score": 0.8561151079136691,
+      "accuracy": 0.75
+    },
+    "Random_Forest_50_8": {
+      "roc_auc": 0.5725,
+      "precision": 0.7465753424657534,
+      "recall": 0.9083333333333333,
+      "f1_score": 0.8195488721804511,
+      "accuracy": 0.7
+    }
+  }
+}
