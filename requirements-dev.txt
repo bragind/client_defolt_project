@@ -1,0 +1,19 @@
+# Базовые зависимости
+-r requirements-core.txt
+
+# Разработка и тестирование
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.9.1
+flake8>=6.0.0
+jupyter>=1.0.0
+ipython>=8.17.2
+
+# MLOps инструменты
+mlflow>=2.11.3
+dvc>=3.45.0
+great-expectations>=0.16.14
+requests>=2.31.0
+
+# Мониторинг
+scipy>=1.11.4

@@ -1,0 +1,8 @@
+# Только необходимое для продакшн
+-r requirements-core.txt
+
+# MLflow для трекинга
+mlflow>=2.11.3
+
+# Requests для API вызовов
+requests>=2.31.0
