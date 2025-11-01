@@ -42,3 +42,8 @@ models/*.pkl
 data/processed/train.csv
 data/processed/test.csv
 models/best_model.pkl
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
