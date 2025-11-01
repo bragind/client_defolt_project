@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  ml-api:
+  ml-service:
     build: .
     ports:
       - "8000:8000"
@@ -9,25 +9,31 @@ services:
       - ./data:/app/data
       - ./models:/app/models
       - ./reports:/app/reports
+      - ./mlruns:/app/mlruns
     environment:
-      - PYTHONPATH=/app/src
-    command: uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
-    
+      - MLFLOW_TRACKING_URI=sqlite:///mlflow.db
+      - PYTHONPATH=/app
+    command: python src/api/app.py
+
   mlflow-ui:
-    image: python:3.9-slim
+    build: .
     ports:
       - "5000:5000"
-    working_dir: /app
     volumes:
-      - .:/app
-    command: |
-      bash -c "pip install mlflow && mlflow ui --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db"
-    
-  monitoring:
+      - ./mlruns:/app/mlruns
+      - ./mlflow.db:/app/mlflow.db
+    environment:
+      - MLFLOW_TRACKING_URI=sqlite:///mlflow.db
+    command: mlflow ui --host 0.0.0.0 --port 5000
+
+  training:
     build: .
     volumes:
-      - .:/app
-    working_dir: /app
-    command: python src/monitoring/drift_detection.py
-    profiles:
-      - monitoring
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./reports:/app/reports
+      - ./mlruns:/app/mlruns
+    environment:
+      - MLFLOW_TRACKING_URI=sqlite:///mlflow.db
+      - PYTHONPATH=/app
+    command: python src/models/train.py
