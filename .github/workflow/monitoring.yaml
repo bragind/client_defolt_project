@@ -1,0 +1,41 @@
+name: Model Monitoring
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Каждый понедельник в 9:00
+  workflow_dispatch:  # Ручной запуск
+
+jobs:
+  drift-detection:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run drift detection
+      run: |
+        python src/monitoring/drift_detection.py
+
+    - name: Upload drift report
+      uses: actions/upload-artifact@v4
+      with:
+        name: drift-report
+        path: reports/drift_report.json
+
+    - name: Send alert on drift
+      if: failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        text: ⚠️ Data drift detected!
+        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -1,0 +1,56 @@
+name: DVC Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/raw/**'
+      - 'src/data/**'
+      - 'dvc.yaml'
+      - 'params.yaml'
+
+jobs:
+  dvc-repro:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        lfs: true
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install DVC and dependencies
+      run: |
+        pip install dvc[s3]
+        pip install -r requirements.txt
+
+    - name: Setup DVC
+      run: |
+        dvc remote modify origin --local access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+        dvc remote modify origin --local secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Pull data from DVC
+      run: |
+        dvc pull
+
+    - name: Reproduce pipeline
+      run: |
+        dvc repro
+
+    - name: Push updated data to DVC
+      run: |
+        dvc push
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff --staged --quiet || git commit -m "Update DVC pipeline [skip ci]"
+        git push
