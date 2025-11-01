@@ -99,7 +99,9 @@ source venv/bin/activate  # На Windows: venv\Scripts\activate
 Установите зависимости
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirements-core.txt #базовые зависимости
+pip instal -r requirements-dev.txt #для разработки
+pip install -r requirements-docker.txt #для контейнера
 Настройте DVC (опционально)
 
 ```bash
