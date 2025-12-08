@@ -236,3 +236,13 @@ Validation Reports - Отчеты валидации данных
 ## Лицензия
 Этот проект создан в образовательных целях.
 
+# 1. Сборка и запуск API
+docker build -t credit-scoring-api .
+docker run -p 8000:8000 credit-scoring-api
+
+# 2. Запуск мониторинга дрифта
+python src/monitoring/drift_detector.py
+
+# 3. Запуск Airflow (опционально)
+airflow scheduler
+airflow webserver

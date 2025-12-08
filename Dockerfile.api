@@ -1,0 +1,30 @@
+# Dockerfile.api
+# Build stage
+FROM python:3.9-slim as builder
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# DVC stage
+FROM python:3.9-slim as dvc
+
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+RUN apt-get update && apt-get install -y git && \
+    pip install dvc[s3]
+
+# Final stage
+FROM python:3.9-slim
+
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
+COPY --from=dvc /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]

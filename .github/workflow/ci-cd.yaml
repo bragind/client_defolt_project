@@ -1,105 +1,46 @@
+# .github/workflows/ci-cd.yml
 name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
-  test:
+  build-and-push-docker:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.9]
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        lfs: true
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
 
-    - name: Install system dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y git
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
-    - name: Run data validation tests
-      run: |
-        python -m pytest tests/test_data.py -v
+      - name: Build and push
+        run: |
+          docker build -t your-repo/credit-scoring-api:latest -f deployment/docker/Dockerfile .
+          docker push your-repo/credit-scoring-api:latest
 
-    - name: Run model tests
-      run: |
-        python -m pytest tests/test_model.py -v
-
-    - name: Run API tests
-      run: |
-        python -m pytest tests/test_api.py -v
-
-    - name: Run code quality checks
-      run: |
-        pip install black flake8
-        black --check src/ tests/
-        flake8 src/ tests/ --max-line-length=88 --extend-ignore=E203,W503
-
-  build-and-push:
-    needs: test
+  deploy-to-kubernetes:
     runs-on: ubuntu-latest
+    needs: build-and-push-docker
     if: github.ref == 'refs/heads/main'
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Deploy to Kubernetes
+        uses: kelseyhightower/awesome-kubernetes-actions@v1
+        with:
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          command: kubectl apply -f k8s/
 
-    - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: |
-          ${{ secrets.DOCKERHUB_USERNAME }}/credit-default-model:latest
-          ${{ secrets.DOCKERHUB_USERNAME }}/credit-default-model:${{ github.sha }}
-        cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/credit-default-model:buildcache
-        cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/credit-default-model:buildcache,mode=max
-
-  deploy:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
-    steps:
-    - name: Deploy to production
-      run: |
-        echo "Deploying to production environment"
-        # Здесь команды для деплоя на ваш сервер
-        # Например, используя SSH:
-        # ssh user@server "docker pull your-image && docker-compose up -d"
-
-    - name: Send notification
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        text: 🚀 New version deployed!
-        webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: always()
+      - name: Wait for deployment
+        run: kubectl rollout status deployment/credit-scoring-api --timeout=5m
