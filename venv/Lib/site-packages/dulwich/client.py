@@ -3064,6 +3064,8 @@ class SSHGitClient(TraditionalGitClient):
         config: Optional[Config] = None,
         path_encoding: str = TraditionalGitClient.DEFAULT_ENCODING,
         vendor: Optional[SSHVendor] = None,
+        key_filename: Optional[str] = None,
+        ssh_command: Optional[str] = None,
     ) -> "SSHGitClient":
         """Create an SSHGitClient from a parsed URL.
 
@@ -3079,6 +3081,8 @@ class SSHGitClient(TraditionalGitClient):
           config: Configuration object
           path_encoding: Encoding for paths
           vendor: SSH implementation to use
+          key_filename: Optional SSH key file
+          ssh_command: Optional custom SSH command
 
         Returns:
           An SSHGitClient instance
@@ -3097,6 +3101,8 @@ class SSHGitClient(TraditionalGitClient):
             vendor=vendor,
             config=config,
             password=password,
+            key_filename=key_filename,
+            ssh_command=ssh_command,
         )
 
     def _get_cmd_path(self, cmd: bytes) -> bytes:
@@ -4021,8 +4027,8 @@ class AbstractHttpGitClient(GitClient):
             base_parsed = base_parsed._replace(netloc=f"{hostname}:{parsedurl.port}")
 
         # Pass credentials to constructor if it's a subclass that supports them
-        if cls is Urllib3HttpGitClient:
-            client = cls(  # type: ignore[call-arg]
+        if issubclass(cls, Urllib3HttpGitClient):
+            client: AbstractHttpGitClient = cls(
                 urlunparse(base_parsed),
                 dumb=dumb,
                 thin_packs=thin_packs,
@@ -4301,6 +4307,8 @@ def _get_transport_and_path_from_url(
             report_activity=report_activity,
             quiet=quiet,
             include_tags=include_tags,
+            key_filename=key_filename,
+            ssh_command=ssh_command,
         ), parsed.path
     elif parsed.scheme in ("http", "https"):
         return (

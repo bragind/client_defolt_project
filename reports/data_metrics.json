@@ -13,6 +13,6 @@
   },
   "class_ratio_train": 0.75,
   "class_ratio_test": 0.75,
-  "train_memory_mb": 0.2227783203125,
-  "test_memory_mb": 0.055694580078125
+  "train_memory_mb": 0.225830078125,
+  "test_memory_mb": 0.05645751953125
 }

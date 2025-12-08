@@ -33,7 +33,7 @@ from requests import RequestException
 from .._base_client import _BaseClient, _RawResponse, _StreamingResponse
 from .._property import _cached_property
 from ..config import Config
-from ..errors import AlreadyExists, NotFound, PermissionDenied
+from ..errors import AlreadyExists, InternalError, NotFound, PermissionDenied
 from ..errors.mapper import _error_mapper
 from ..retries import retried
 from ..service import files
@@ -1134,7 +1134,9 @@ class FilesExt(files.FilesAPI):
             f"Upload context: part_size={ctx.part_size}, batch_size={ctx.batch_size}, content_length={ctx.content_length}"
         )
 
-        if ctx.use_parallel:
+        if ctx.use_parallel and (
+            ctx.content_length is None or ctx.content_length >= self._config.files_ext_multipart_upload_min_stream_size
+        ):
             self._parallel_upload_from_stream(ctx, contents)
             return UploadStreamResult()
         elif ctx.content_length is not None:
@@ -1206,7 +1208,7 @@ class FilesExt(files.FilesAPI):
             use_parallel=use_parallel,
             parallelism=parallelism,
         )
-        if ctx.use_parallel:
+        if ctx.use_parallel and ctx.content_length >= self._config.files_ext_multipart_upload_min_stream_size:
             self._parallel_upload_from_file(ctx)
             return UploadFileResult()
         else:
@@ -1459,8 +1461,9 @@ class FilesExt(files.FilesAPI):
         # Do the first part read ahead
         pre_read_buffer = content.read(ctx.part_size)
         if not pre_read_buffer:
-            self._complete_multipart_upload(ctx, {}, session_token)
-            return
+            raise FallbackToUploadUsingFilesApi(
+                b"", "Falling back to single-shot upload with Files API due to empty input stream"
+            )
         try:
             etag = self._do_upload_one_part(
                 ctx, cloud_provider_session, 1, 0, len(pre_read_buffer), session_token, BytesIO(pre_read_buffer)
@@ -1650,6 +1653,13 @@ class FilesExt(files.FilesAPI):
                     raise FallbackToUploadUsingFilesApi(None, "Presigned URLs are disabled")
                 else:
                     raise e from None
+            except InternalError as e:
+                if self._is_presigned_urls_network_zone_error(e):
+                    raise FallbackToUploadUsingFilesApi(
+                        None, "Presigned URLs are not supported in the current network zone"
+                    )
+                else:
+                    raise e from None
 
             upload_part_urls = upload_part_urls_response.get("upload_part_urls", [])
             if len(upload_part_urls) == 0:
@@ -1758,6 +1768,13 @@ class FilesExt(files.FilesAPI):
             except PermissionDenied as e:
                 if chunk_offset == 0 and self._is_presigned_urls_disabled_error(e):
                     raise FallbackToUploadUsingFilesApi(buffer, "Presigned URLs are disabled")
+                else:
+                    raise e from None
+            except InternalError as e:
+                if chunk_offset == 0 and self._is_presigned_urls_network_zone_error(e):
+                    raise FallbackToUploadUsingFilesApi(
+                        buffer, "Presigned URLs are not supported in the current network zone"
+                    )
                 else:
                     raise e from None
 
@@ -1917,6 +1934,13 @@ class FilesExt(files.FilesAPI):
                 return True
         return False
 
+    def _is_presigned_urls_network_zone_error(self, e: InternalError) -> bool:
+        error_infos = e.get_error_info()
+        for error_info in error_infos:
+            if error_info.reason == "FILES_API_REQUESTER_NETWORK_ZONE_UNKNOWN":
+                return True
+        return False
+
     def _perform_resumable_upload(
         self,
         ctx: _UploadContext,
@@ -1964,6 +1988,13 @@ class FilesExt(files.FilesAPI):
         except PermissionDenied as e:
             if self._is_presigned_urls_disabled_error(e):
                 raise FallbackToUploadUsingFilesApi(pre_read_buffer, "Presigned URLs are disabled")
+            else:
+                raise e from None
+        except InternalError as e:
+            if self._is_presigned_urls_network_zone_error(e):
+                raise FallbackToUploadUsingFilesApi(
+                    pre_read_buffer, "Presigned URLs are not supported in the current network zone"
+                )
             else:
                 raise e from None
 
@@ -2348,6 +2379,11 @@ class FilesExt(files.FilesAPI):
         except PermissionDenied as e:
             if self._is_presigned_urls_disabled_error(e):
                 raise FallbackToDownloadUsingFilesApi(f"Presigned URLs are disabled")
+            else:
+                raise e from None
+        except InternalError as e:
+            if self._is_presigned_urls_network_zone_error(e):
+                raise FallbackToDownloadUsingFilesApi("Presigned URLs are not supported in the current network zone")
             else:
                 raise e from None
 

@@ -39,7 +39,7 @@ def lexicographic_sort_schema(schema: GraphQLSchema) -> GraphQLSchema:
     """
 
     def replace_type(
-        type_: Union[GraphQLList, GraphQLNonNull, GraphQLNamedType]
+        type_: Union[GraphQLList, GraphQLNonNull, GraphQLNamedType],
     ) -> Union[GraphQLList, GraphQLNonNull, GraphQLNamedType]:
         if is_list_type(type_):
             return GraphQLList(replace_type(cast(GraphQLList, type_).of_type))
@@ -88,7 +88,7 @@ def lexicographic_sort_schema(schema: GraphQLSchema) -> GraphQLSchema:
         return fields
 
     def sort_input_fields(
-        fields_map: Dict[str, GraphQLInputField]
+        fields_map: Dict[str, GraphQLInputField],
     ) -> Dict[str, GraphQLInputField]:
         return {
             name: GraphQLInputField(
@@ -97,6 +97,7 @@ def lexicographic_sort_schema(schema: GraphQLSchema) -> GraphQLSchema:
                 ),
                 description=field.description,
                 default_value=field.default_value,
+                extensions=field.extensions,
                 ast_node=field.ast_node,
             )
             for name, field in sorted(fields_map.items())
@@ -143,6 +144,7 @@ def lexicographic_sort_schema(schema: GraphQLSchema) -> GraphQLSchema:
                             val.value,
                             description=val.description,
                             deprecation_reason=val.deprecation_reason,
+                            extensions=val.extensions,
                             ast_node=val.ast_node,
                         )
                         for name, val in sorted(type_.values.items())
@@ -179,11 +181,12 @@ def lexicographic_sort_schema(schema: GraphQLSchema) -> GraphQLSchema:
         subscription=cast(
             Optional[GraphQLObjectType], replace_maybe_type(schema.subscription_type)
         ),
+        extensions=schema.extensions,
         ast_node=schema.ast_node,
     )
 
 
 def sort_by_name_key(
-    type_: Union[GraphQLNamedType, GraphQLDirective, DirectiveLocation]
+    type_: Union[GraphQLNamedType, GraphQLDirective, DirectiveLocation],
 ) -> Tuple:
     return natural_comparison_key(type_.name)

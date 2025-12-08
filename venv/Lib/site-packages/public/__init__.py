@@ -3,7 +3,7 @@ from .private import private
 from .public import public
 
 
-__version__ = '6.0.2'
+__version__ = '7.0.0'
 
 
 # mypy does not understand that __all__ gets populated at runtime via the

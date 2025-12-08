@@ -256,6 +256,7 @@ from .type import (
     GraphQLSkipDirective,
     GraphQLDeprecatedDirective,
     GraphQLSpecifiedByDirective,
+    GraphQLOneOfDirective,
     # "Enum" of Type Kinds
     TypeKind,
     # Constant Deprecation Reason
@@ -341,6 +342,7 @@ from .type import (
     GraphQLArgumentMap,
     GraphQLEnumValue,
     GraphQLEnumValueMap,
+    GraphQLEnumValuesDefinition,
     GraphQLField,
     GraphQLFieldMap,
     GraphQLFieldResolver,
@@ -378,6 +380,7 @@ from .validation import (
     SDLValidationRule,
     # All validation rules in the GraphQL Specification.
     specified_rules,
+    recommended_rules,
     # Individual validation rules.
     ExecutableDefinitionsRule,
     FieldsOnCorrectTypeRule,
@@ -417,6 +420,8 @@ from .validation import (
     # Custom validation rules
     NoDeprecatedCustomRule,
     NoSchemaIntrospectionCustomRule,
+    # Recommended validation rules
+    MaxIntrospectionDepthRule,
 )
 
 # Execute GraphQL documents.
@@ -485,6 +490,7 @@ __all__ = [
     "GraphQLSkipDirective",
     "GraphQLDeprecatedDirective",
     "GraphQLSpecifiedByDirective",
+    "GraphQLOneOfDirective",
     "TypeKind",
     "DEFAULT_DEPRECATION_REASON",
     "introspection_types",
@@ -559,6 +565,7 @@ __all__ = [
     "GraphQLArgumentMap",
     "GraphQLEnumValue",
     "GraphQLEnumValueMap",
+    "GraphQLEnumValuesDefinition",
     "GraphQLField",
     "GraphQLFieldMap",
     "GraphQLFieldResolver",
@@ -700,6 +707,7 @@ __all__ = [
     "ASTValidationRule",
     "SDLValidationRule",
     "specified_rules",
+    "recommended_rules",
     "ExecutableDefinitionsRule",
     "FieldsOnCorrectTypeRule",
     "FragmentsOnCompositeTypesRule",
@@ -736,6 +744,7 @@ __all__ = [
     "PossibleTypeExtensionsRule",
     "NoDeprecatedCustomRule",
     "NoSchemaIntrospectionCustomRule",
+    "MaxIntrospectionDepthRule",
     "GraphQLError",
     "GraphQLErrorExtensions",
     "GraphQLFormattedError",

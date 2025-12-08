@@ -1,5 +1,5 @@
 # Licensed under the Apache License: http://www.apache.org/licenses/LICENSE-2.0
-# For details: https://github.com/nedbat/coveragepy/blob/master/NOTICE.txt
+# For details: https://github.com/coveragepy/coveragepy/blob/main/NOTICE.txt
 
 """Exceptions coverage.py can raise."""
 
@@ -8,21 +8,26 @@ from __future__ import annotations
 from typing import Any
 
 
-class _BaseCoverageException(Exception):
-    """The base-base of all Coverage exceptions."""
+class CoverageException(Exception):
+    """The base class of all exceptions raised by Coverage.py."""
 
-    def __init__(self, *args: Any, slug: str | None = None) -> None:
+    def __init__(
+        self,
+        *args: Any,
+        slug: str | None = None,
+    ) -> None:
+        """Create an exception.
+
+        Args:
+            slug: A short string identifying the exception, will be used for
+                linking to documentation.
+        """
+
         super().__init__(*args)
         self.slug = slug
 
 
-class CoverageException(_BaseCoverageException):
-    """The base class of all exceptions raised by Coverage.py."""
-
-    pass
-
-
-class ConfigError(_BaseCoverageException):
+class ConfigError(CoverageException):
     """A problem with a config file, or a value in one."""
 
     pass

@@ -144,7 +144,7 @@ def print_scalar(type_: GraphQLScalarType) -> str:
 
 
 def print_implemented_interfaces(
-    type_: Union[GraphQLObjectType, GraphQLInterfaceType]
+    type_: Union[GraphQLObjectType, GraphQLInterfaceType],
 ) -> str:
     interfaces = type_.interfaces
     return " implements " + " & ".join(i.name for i in interfaces) if interfaces else ""
@@ -189,7 +189,12 @@ def print_input_object(type_: GraphQLInputObjectType) -> str:
         print_description(field, "  ", not i) + "  " + print_input_value(name, field)
         for i, (name, field) in enumerate(type_.fields.items())
     ]
-    return print_description(type_) + f"input {type_.name}" + print_block(fields)
+    return (
+        print_description(type_)
+        + f"input {type_.name}"
+        + (" @oneOf" if type_.is_one_of else "")
+        + print_block(fields)
+    )
 
 
 def print_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]) -> str:

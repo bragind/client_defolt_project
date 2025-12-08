@@ -6036,8 +6036,11 @@ class Source(Enum):
 @dataclass
 class SparkJarTask:
     jar_uri: Optional[str] = None
-    """Deprecated since 04/2016. Provide a `jar` through the `libraries` field instead. For an example,
-    see :method:jobs/create."""
+    """Deprecated since 04/2016. For classic compute, provide a `jar` through the `libraries` field
+    instead. For serverless compute, provide a `jar` though the `java_dependencies` field inside the
+    `environments` list.
+    
+    See the examples of classic and serverless compute usage at the top of the page."""
 
     main_class_name: Optional[str] = None
     """The full name of the class containing the main method to be executed. This class must be
@@ -7240,16 +7243,16 @@ class TableTriggerState:
 
 @dataclass
 class TableUpdateTriggerConfiguration:
+    table_names: List[str]
+    """A list of tables to monitor for changes. The table name must be in the format
+    `catalog_name.schema_name.table_name`."""
+
     condition: Optional[Condition] = None
     """The table(s) condition based on which to trigger a job run."""
 
     min_time_between_triggers_seconds: Optional[int] = None
     """If set, the trigger starts a run only after the specified amount of time has passed since the
     last time the trigger fired. The minimum allowed value is 60 seconds."""
-
-    table_names: Optional[List[str]] = None
-    """A list of tables to monitor for changes. The table name must be in the format
-    `catalog_name.schema_name.table_name`."""
 
     wait_after_last_change_seconds: Optional[int] = None
     """If set, the trigger starts a run only after no table updates have occurred for the specified
