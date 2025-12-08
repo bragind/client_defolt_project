@@ -1,0 +1,69 @@
+# Этап 1: Сборка зависимостей
+FROM python:3.9-slim as builder
+
+WORKDIR /app
+
+# Копирование requirements
+COPY requirements.txt .
+COPY requirements-api.txt .
+
+# Установка зависимостей
+RUN pip install --user --no-cache-dir -r requirements-api.txt
+
+# Копирование DVC для управления данными
+RUN pip install --user dvc[s3]
+
+# Этап 2: Сборка модели
+FROM python:3.9-slim as model-builder
+
+WORKDIR /app
+
+# Копирование скриптов для работы с моделью
+COPY scripts/model_training/ ./scripts/model_training/
+COPY models/ ./models/
+
+# Установка зависимостей для модели
+RUN pip install --no-cache-dir torch onnx onnxruntime
+
+# Этап 3: Финальный образ
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Установка системных зависимостей
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копирование зависимостей из builder этапа
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+# Копирование моделей из model-builder этапа
+COPY --from=model-builder /app/models/ ./models/
+
+# Копирование исходного кода
+COPY src/ ./src/
+COPY data/ ./data/
+COPY dvc.yaml .
+COPY .dvc/ .dvc/
+COPY .dvcignore .
+
+# Настройка DVC
+RUN dvc pull -R models/
+
+# Создание пользователя для безопасности
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Настройка переменных окружения
+ENV PYTHONPATH=/app/src
+ENV PYTHONUNBUFFERED=1
+ENV MODEL_PATH=/app/models/credit_scoring_nn.onnx
+
+# Открытие порта
+EXPOSE 8000
+
+# Запуск приложения
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
