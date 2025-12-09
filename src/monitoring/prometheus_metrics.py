@@ -2,6 +2,10 @@ from prometheus_client import Counter, Histogram, Gauge, generate_latest
 from fastapi import Response
 import time
 from functools import wraps
+from prometheus_client import Gauge
+
+drift_gauge = Gauge('evidently_drift_score', 'Current data drift score')
+drift_gauge.set(current_drift_value)
 
 # Метрики приложения
 REQUEST_COUNT = Counter(

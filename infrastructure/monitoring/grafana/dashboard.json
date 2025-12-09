@@ -1,0 +1,62 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Credit Scoring API Monitoring",
+    "tags": ["ml", "api", "mlops"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 0,
+    "refresh": "30s",
+    "rows": [
+      {
+        "panels": [
+          {
+            "title": "Uptime",
+            "type": "stat",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "up{job=\"credit-scoring-api\"}",
+                "legendFormat": "API Up"
+              }
+            ]
+          },
+          {
+            "title": "Requests per second",
+            "type": "graph",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "rate(http_request_duration_seconds_count{job=\"credit-scoring-api\"}[1m])",
+                "legendFormat": "RPS"
+              }
+            ]
+          },
+          {
+            "title": "Latency (p95)",
+            "type": "graph",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=\"credit-scoring-api\"}[1m]))",
+                "legendFormat": "p95 latency"
+              }
+            ]
+          },
+          {
+            "title": "Data Drift Score",
+            "type": "graph",
+            "datasource": "Prometheus",
+            "targets": [
+              {
+                "expr": "evidently_drift_score",
+                "legendFormat": "Drift Score"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}
