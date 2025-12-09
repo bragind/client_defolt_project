@@ -1,0 +1,40 @@
+# client_defolt_project/Dockerfile.dev
+
+FROM python:3.12-slim
+
+# Установка системных зависимостей
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        make \
+        git \
+        curl \
+        wget \
+        ca-certificates \
+        build-essential \
+        && rm -rf /var/lib/apt/lists/*
+
+# Установка DVC (из официального источника)
+RUN pip install "dvc[ssh]" "dvc[s3]"  # или нужные backend'ы
+
+# Установка Airflow (если используется локально, а не через отдельный сервис)
+# RUN pip install apache-airflow==2.8.1 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.8.1/constraints-3.12.txt
+
+# Рабочая директория
+WORKDIR /app
+
+# Копируем зависимости первыми — для кэширования
+COPY requirements-core.txt .
+COPY requirements-dev.txt .
+RUN pip install -r requirements-core.txt -r requirements-dev.txt
+
+# Копируем весь проект
+COPY . .
+
+# Экспонируем порты (по необходимости)
+EXPOSE 8000  # FastAPI
+EXPOSE 9090  # Prometheus
+EXPOSE 3000  # Grafana
+EXPOSE 8080  # Airflow Webserver
+
+# Запускаем bash по умолчанию — для интерактивной отладки
+CMD ["bash"]
