@@ -1,10 +1,15 @@
+# client_defolt_project/data/make_dataset.py
+
 import pandas as pd
 import os
+from pathlib import Path
+
+# Определяем корень проекта как родительский каталог для `data/`
+PROJECT_ROOT = Path(__file__).parent.parent
 
 def load_data(filepath):
     """Загружает данные из CSV."""
-    df = pd.read_csv(filepath)
-    return df
+    return pd.read_csv(filepath)
 
 def clean_data(df):
     """Выполняет первичную очистку данных."""
@@ -22,13 +27,15 @@ def clean_data(df):
 
 def save_data(df, output_path):
     """Сохраняет данные в CSV."""
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
 
 if __name__ == "__main__":
-    input_file = "../data/raw/UCI_Credit_Card.csv"
-    output_train = "../data/processed/train.csv"
-    output_test = "../data/processed/test.csv"
+    # Используем абсолютные пути относительно PROJECT_ROOT
+    input_file = PROJECT_ROOT / "data" / "raw" / "UCI_Credit_Card.csv"
+    output_train = PROJECT_ROOT / "data" / "processed" / "train.csv"
+    output_test = PROJECT_ROOT / "data" / "processed" / "test.csv"
     
     print("Загрузка данных...")
     df = load_data(input_file)
@@ -38,7 +45,7 @@ if __name__ == "__main__":
     df_clean = clean_data(df)
     print(f"После очистки: {df_clean.shape}")
     
-    # Разделяем на train/test (простое разделение 80/20)
+    # Разделяем на train/test (80/20)
     train_df = df_clean.sample(frac=0.8, random_state=42)
     test_df = df_clean.drop(train_df.index)
     
