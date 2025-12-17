@@ -58,7 +58,7 @@ def check_data_drift(**context):
     
     context['ti'].xcom_push(key='retrain_required', value=retrain_required)
     context['ti'].xcom_push(key='retrain_reason', value=retrain_reason)
-    context['ti'].xcom_push(key='drift_results', json.dumps(results))
+    context['ti'].xcom_push(key='drift_results', value=json.dumps(results))
     
     return retrain_required
 
