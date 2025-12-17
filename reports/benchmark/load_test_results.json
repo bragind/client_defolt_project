@@ -1,0 +1,12 @@
+{
+  "target_rps": 10,
+  "actual_rps": 39.654117782714046,
+  "duration_sec": 30,
+  "total_requests": 1190,
+  "successful_requests": 0,
+  "error_rate": 1.0,
+  "avg_latency_ms": 0,
+  "p50_latency_ms": 0,
+  "p95_latency_ms": 0,
+  "p99_latency_ms": 0
+}

@@ -1,23 +1,23 @@
 {
   "best_model": "Logistic_Regression_C_0.1",
-  "best_roc_auc": 0.6512499999999999,
+  "best_roc_auc": 0.6516666666666666,
   "all_models": {
     "Logistic_Regression_C_0.1": {
-      "roc_auc": 0.6512499999999999,
+      "roc_auc": 0.6516666666666666,
       "precision": 0.8041237113402062,
       "recall": 0.65,
       "f1_score": 0.7188940092165899,
       "accuracy": 0.61875
     },
     "Logistic_Regression_C_1.0": {
-      "roc_auc": 0.6439583333333333,
+      "roc_auc": 0.6443749999999999,
       "precision": 0.8061224489795918,
       "recall": 0.6583333333333333,
       "f1_score": 0.7247706422018348,
       "accuracy": 0.625
     },
     "Logistic_Regression_C_10.0": {
-      "roc_auc": 0.645,
+      "roc_auc": 0.6447916666666667,
       "precision": 0.8061224489795918,
       "recall": 0.6583333333333333,
       "f1_score": 0.7247706422018348,
@@ -27,7 +27,7 @@
       "roc_auc": 0.6410416666666667,
       "precision": 0.7419354838709677,
       "recall": 0.9583333333333334,
-      "f1_score": 0.8363636363636364,
+      "f1_score": 0.8363636363636363,
       "accuracy": 0.71875
     },
     "Random_Forest_200_15": {

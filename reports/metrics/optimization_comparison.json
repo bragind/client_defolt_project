@@ -1,0 +1,23 @@
+{
+  "pytorch": {
+    "roc_auc": 0.5442666666666667,
+    "accuracy": 0.74,
+    "mean_inference_time_ms": 0.7888046598964138,
+    "throughput": 253548.19788496697,
+    "model_size_kb": 28.5302734375
+  },
+  "onnx": {
+    "roc_auc": 0.5442666666666667,
+    "accuracy": 0.74,
+    "mean_inference_time_ms": 1.0676231399884273,
+    "throughput": 187332.02055003037,
+    "model_size_kb": 23.5625
+  },
+  "quantized": {
+    "roc_auc": 0.5521333333333334,
+    "accuracy": 0.75,
+    "mean_inference_time_ms": 0.9226271200714109,
+    "throughput": 216772.2968998788,
+    "model_size_kb": 14.658203125
+  }
+}

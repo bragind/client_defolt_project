@@ -1,0 +1,39 @@
+{
+  "validation": {
+    "mse": 1.4210854715202004e-14,
+    "max_absolute_difference": 1.1920928955078125e-07,
+    "pytorch_output_sample": 0.8842258453369141,
+    "onnx_output_sample": 0.8842259645462036,
+    "conversion_valid": true
+  },
+  "benchmark": {
+    "batch_1": {
+      "pytorch_mean_ms": 0.3058465334106586,
+      "onnx_mean_ms": 0.03603763334467658,
+      "speedup": 8.486865119177915,
+      "throughput_pytorch": 3269.6136485460993,
+      "throughput_onnx": 27748.770027033934
+    },
+    "batch_10": {
+      "pytorch_mean_ms": 1.0627000000871099,
+      "onnx_mean_ms": 0.10716279984990251,
+      "speedup": 9.91668752193466,
+      "throughput_pytorch": 9409.993412233272,
+      "throughput_onnx": 93315.96425258105
+    },
+    "batch_100": {
+      "pytorch_mean_ms": 1.377517566743336,
+      "onnx_mean_ms": 0.3630132666633775,
+      "speedup": 3.794675548375231,
+      "throughput_pytorch": 72594.35553799538,
+      "throughput_onnx": 275472.0259100891
+    },
+    "batch_200": {
+      "pytorch_mean_ms": 1.145503366600072,
+      "onnx_mean_ms": 0.7140352000836477,
+      "speedup": 1.6042673617013263,
+      "throughput_pytorch": 174595.73304757095,
+      "throughput_onnx": 280098.2360205357
+    }
+  }
+}

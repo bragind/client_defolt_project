@@ -1,0 +1,36 @@
+{
+  "system_info": {
+    "cpu_count": 4,
+    "cpu_freq": 0.0,
+    "memory_gb": 3.764881134033203,
+    "has_gpu": false,
+    "gpu_info": ""
+  },
+  "model_path": "models/credit_scoring_nn_quantized.onnx",
+  "benchmarks": [
+    {
+      "batch_size": 1,
+      "avg_latency_ms": 0.08849657991959248,
+      "p95_latency_ms": 0.13963114943180693,
+      "avg_cpu_percent": 3.1510000000000002,
+      "avg_memory_mb": 0.0,
+      "throughput": 11299.871711523707
+    },
+    {
+      "batch_size": 10,
+      "avg_latency_ms": 0.18413946985674556,
+      "p95_latency_ms": 0.31416829770023463,
+      "avg_cpu_percent": 5.1875,
+      "avg_memory_mb": 0.0,
+      "throughput": 54306.662269526845
+    },
+    {
+      "batch_size": 100,
+      "avg_latency_ms": 0.5620552701293491,
+      "p95_latency_ms": 0.9662105971074193,
+      "avg_cpu_percent": 12.25,
+      "avg_memory_mb": 0.0,
+      "throughput": 177918.4455951928
+    }
+  ]
+}

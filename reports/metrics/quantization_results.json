@@ -1,0 +1,43 @@
+{
+  "size": {
+    "original_size_bytes": 24128,
+    "quantized_size_bytes": 15010,
+    "size_reduction_percent": 37.79011936339523
+  },
+  "validation": {
+    "mse": 0.0005664752679876983,
+    "max_absolute_difference": 0.08719247579574585,
+    "correlation": 0.9933656323747644,
+    "quantization_valid": true
+  },
+  "benchmark": {
+    "batch_1": {
+      "original_mean_ms": 0.15109216662191707,
+      "quantized_mean_ms": 0.08064853339722806,
+      "speedup": 1.8734645288306035,
+      "throughput_original": 6618.476803647492,
+      "throughput_quantized": 12399.481526521728
+    },
+    "batch_10": {
+      "original_mean_ms": 0.13105933330734842,
+      "quantized_mean_ms": 0.21149773341070005,
+      "speedup": 0.619672519387472,
+      "throughput_original": 76301.31901059583,
+      "throughput_quantized": 47281.83058388314
+    },
+    "batch_100": {
+      "original_mean_ms": 0.9360108000085651,
+      "quantized_mean_ms": 0.746882833300333,
+      "speedup": 1.2532230736546879,
+      "throughput_original": 106836.37410923564,
+      "throughput_quantized": 133889.8091392984
+    },
+    "batch_200": {
+      "original_mean_ms": 1.1963556665553672,
+      "quantized_mean_ms": 0.8064050333511356,
+      "speedup": 1.4835667153312944,
+      "throughput_original": 167174.3659440794,
+      "throughput_quantized": 248014.3249712497
+    }
+  }
+}

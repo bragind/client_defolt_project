@@ -158,7 +158,7 @@ def train_model():
     os.makedirs('plots', exist_ok=True)
     
     # Настройка MLflow
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+    #mlflow.set_tracking_uri("sqlite:///mlflow.db")
     mlflow.set_experiment("credit_default_prediction")
     
     # Загрузка данных
