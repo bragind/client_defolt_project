@@ -1,0 +1,117 @@
+name: Deploy to VK Cloud
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  REGISTRY: cr.ru-7.vkcs.ru  # Замените на ваш регион
+  REPO: your-namespace/ml-service  # Замените на ваш namespace
+  TF_STATE_BUCKET: ${{ secrets.VK_TF_STATE_BUCKET }}
+
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to VK Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.VK_REGISTRY_USER }}
+          password: ${{ secrets.VK_REGISTRY_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.sha }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO }}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.REPO }}:buildcache,mode=max
+
+  deploy-infra:
+    name: Deploy Infrastructure
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Configure AWS CLI (for S3 backend)
+        run: |
+          pip3 install awscli
+          aws configure set aws_access_key_id ${{ secrets.VK_TF_ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.VK_TF_SECRET_KEY }}
+          aws configure set region ${{ secrets.VK_REGION }}
+
+      - name: Terraform Init
+        run: |
+          cd infrastructure/terraform
+          terraform init \
+            -backend-config="bucket=${{ env.TF_STATE_BUCKET }}" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=${{ secrets.VK_REGION }}" \
+            -backend-config="endpoint=https://api.storage.selcloud.ru" \
+            -backend-config="access_key=${{ secrets.VK_TF_ACCESS_KEY }}" \
+            -backend-config="secret_key=${{ secrets.VK_TF_SECRET_KEY }}" \
+            -backend-config="skip_region_validation=true" \
+            -backend-config="skip_credentials_validation=true" \
+            -backend-config="force_path_style=true"
+
+      - name: Terraform Apply
+        run: |
+          cd infrastructure/terraform
+          terraform apply -auto-approve \
+            -var="username=${{ secrets.VK_USERNAME }}" \
+            -var="password=${{ secrets.VK_PASSWORD }}" \
+            -var="project_id=${{ secrets.VK_PROJECT_ID }}" \
+            -var="region=${{ secrets.VK_REGION }}"
+
+      - name: Save Kubeconfig
+        id: kubeconfig
+        run: |
+          cd infrastructure/terraform
+          terraform output -json kubernetes_cluster_kubeconfig > kubeconfig
+          echo "KUBECONFIG=$(cat kubeconfig | base64 -w 0)" >> $GITHUB_OUTPUT
+
+      - name: Upload Kubeconfig
+        uses: actions/upload-artifact@v4
+        with:
+          name: kubeconfig
+          path: infrastructure/terraform/kubeconfig
+
+  deploy-app:
+    name: Deploy Application to Kubernetes
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Kubeconfig
+        uses: actions/download-artifact@v4
+        with:
+          name: kubeconfig
+          path: .
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Deploy to K8s
+        run: |
+          export KUBECONFIG=$(pwd)/kubeconfig
+          # Обновляем образ в манифесте
+          sed -i "s|image:.*|image: ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.sha }}|" infrastructure/kubernetes/base/deployment.yaml
+          kubectl apply -k infrastructure/kubernetes/overlays/prod
