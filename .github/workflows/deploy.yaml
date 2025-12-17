@@ -5,13 +5,40 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY: cr.ru-7.vkcs.ru  # Замените на ваш регион
-  REPO: your-namespace/ml-service  # Замените на ваш namespace
+  REGISTRY: cr.ru-7.vkcs.ru
+  REPO: your-namespace/ml-service  # ← замените на ваш namespace
   TF_STATE_BUCKET: ${{ secrets.VK_TF_STATE_BUCKET }}
 
 jobs:
+  security-scan:
+    name: Security Scan (Bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit Security Scan
+        run: |
+          # Исключаем типичные нерелевантные директории
+          bandit -r . \
+            --exclude ./tests,./venv,./.venv,./.git,./dist,./build \
+            -ll -x "*.pyc,*.md,*.txt,*.yml,*.yaml,Dockerfile" \
+            --format txt
+
+          # Bandit завершится с кодом 1, если найдены medium/high issues.
+          # Это автоматически остановит workflow.
+
   build:
     name: Build and Push Docker Image
+    needs: security-scan
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
