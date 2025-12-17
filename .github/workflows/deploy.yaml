@@ -27,14 +27,10 @@ jobs:
 
       - name: Run Bandit Security Scan
         run: |
-          # Исключаем типичные нерелевантные директории
           bandit -r . \
-            --exclude ./tests,./venv,./.venv,./.git,./dist,./build \
-            -ll -x "*.pyc,*.md,*.txt,*.yml,*.yaml,Dockerfile" \
+            --exclude ./venv,./.venv,./env,./.git,./dist,./build,./tests,./notebooks,./.ipynb_checkpoints \
+            -ll -x "*.pyc,*.md,*.txt,*.yml,*.yaml,Dockerfile,*.ipynb" \
             --format txt
-
-          # Bandit завершится с кодом 1, если найдены medium/high issues.
-          # Это автоматически остановит workflow.
 
   build:
     name: Build and Push Docker Image
@@ -139,6 +135,5 @@ jobs:
       - name: Deploy to K8s
         run: |
           export KUBECONFIG=$(pwd)/kubeconfig
-          # Обновляем образ в манифесте
           sed -i "s|image:.*|image: ${{ env.REGISTRY }}/${{ env.REPO }}:${{ github.sha }}|" infrastructure/kubernetes/base/deployment.yaml
           kubectl apply -k infrastructure/kubernetes/overlays/prod
