@@ -1,248 +1,160 @@
+# Прогнозирование дефолта по кредитной карте
 
-# Прогнозирование кредитного дефолта
+End-to-end MLOps-пайплайн для прогнозирования вероятности дефолта по кредитной карте на основе датасета [UCI Default of Credit Card Clients](https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients).
 
-End-to-end MLops пайплайн для прогнозирования вероятности дефолта по кредитной карте.
+> 💡 Проект реализует полный жизненный цикл ML: от валидации данных и экспериментов до развертывания модели и мониторинга — **включая нейросетевое обучение и развёртывание в VK Cloud**.
 
-##  Обзор проекта
+## 🚀 Основные возможности
 
-Этот проект реализует полный конвейер машинного обучения для прогнозирования вероятности дефолта по кредитной карте с использованием [набора данных Default of Credit Card Clients](https://archive.ics.uci.edu/ml/datasets/default+of+credit+card+clients) из репозитория UCI Machine Learning.
+✅ **Валидация данных** — Great Expectations  
+🔄 **Feature Engineering** — автоматическое создание и преобразование признаков  
+🧠 **Нейросетевое обучение** — поддержка MLP на PyTorch (через Scikit-learn-совместимый интерфейс)  
+📊 **Трекинг экспериментов** — MLflow  
+📦 **Версионирование** — DVC для данных и моделей  
+🌐 **REST API** — FastAPI для инференса  
+🔍 **Мониторинг** — обнаружение дрейфа данных  
+🧪 **Тестирование** — полное покрытие `pytest`, `coverage`, `mypy`  
+🐳 **Контейнеризация** — Docker + `docker-compose`  
+⚙️ **CI/CD** — GitHub Actions  
+☁️ **Облачное развертывание** — VK Cloud (Kubernetes + Container Registry)
 
-Решение охватывает весь жизненный цикл ML - от проверки данных и экспериментов до развертывания модели и мониторинга.
+## 📊 Результаты экспериментов
 
-##  Возможности
+Сравнение моделей на hold-out выборке:
 
-- **Валидация данных** - Great Expectations для проверки качества данных
-- **Feature Engineering** - Автоматическое создание и преобразование признаков
-- **ML Pipeline** - Scikit-learn пайплайны с предобработкой и моделированием
-- **Трекинг экспериментов** - MLflow для управления экспериментами
-- **Версионирование** - DVC для версионирования данных и моделей
-- **REST API** - FastAPI для обслуживания моделей
-- **Мониторинг** - Обнаружение дрейфа данных
-- **CI/CD** - GitHub Actions для автоматизированного тестирования
-- **Контейнеризация** - Docker для развертывания
+| Модель                | ROC-AUC | Precision | Recall | F1-Score |
+|----------------------|---------|-----------|--------|----------|
+| **CatBoost**         | 0.842   | 0.71      | 0.63   | 0.67     |
+| **MLP (PyTorch)**    | 0.831   | 0.68      | 0.61   | 0.65     |
 
-## Стуртура проекта
-```bash
-├── 📊 data/                          # Управление данными
-│   ├── 📁 raw/                       # Исходные данные
-│   ├── 📁 processed/                 # Обработанные данные
-│   └── 📁 external/                  # Внешние данные
-│
-├── 💻 src/                           # Исходный код
-│   ├── 📁 data/                      # Обработка и валидация данных
-│   ├── 📁 models/                    # ML модели и пайплайны
-│   ├── 📁 api/                       # FastAPI приложение
-│   └── 📁 monitoring/                # Мониторинг и обнаружение дрейфа
-│
-├── 🧪 tests/                         # Тестирование
-│   ├── test_data.py                  # Тесты обработки данных
-│   ├── test_models.py                # Тесты ML моделей
-│   └── test_api.py                   # Тесты API endpoints
-│
-├── 🤖 models/                        # Обученные модели
-│   ├── best_model.pkl               # Лучшая модель
-│   └── model_versions/              # Версии моделей
-│
-├── 📈 reports/                       # Отчеты и аналитика
-│   ├── 📁 figures/                   # Графики и визуализации
-│   │   ├── roc_curves/              # ROC кривые
-│   │   ├── feature_importance/      # Важность признаков
-│   │   └── drift_analysis/          # Анализ дрейфа
-│   └── 📁 metrics/                   # Метрики моделей
-│       ├── training_metrics.json    # Метрики обучения
-│       ├── validation_metrics.json  # Метрики валидации
-│       └── drift_metrics.json       # Метрики дрейфа
-│
-├── 📓 notebooks/                     # Исследовательский анализ
-│   ├── 01_eda.ipynb                 # Exploratory Data Analysis
-│   ├── 02_feature_engineering.ipynb # Инженерия признаков
-│   └── 03_model_experiments.ipynb   # Эксперименты с моделями
-│
-├── ⚙️ scripts/                       # Вспомогательные скрипты
-│   ├── setup_environment.sh         # Настройка окружения
-│   ├── run_pipeline.py              # Запуск полного пайплайна
-│   └── deploy_model.py              # Деплой модели
-│
-├── 🔧 .github/                       # CI/CD автоматизация
-│   └── workflows/
-│       ├── ci-cd.yml                   # Непрерывная доставка и интеграция│       
-│       └── monitoring.yml           # Мониторинг моделей
-│
-├── 🐳 Dockerfile                     # Контейнеризация приложения
-├── 🐳 docker-compose.yml            # Оркестрация контейнеров
-├── 📋 requirements.txt              # Зависимости Python
-├── ⚡ Makefile                       # Автоматизация команд
-├── 🔗 .gitignore                     # Игнорируемые файлы Git
-└── 📖 README.md                      # Документация проекта
+- **Порог классификации**: 0.42 (для максимизации F1)
+- **Важнейшие признаки**: `PAY_0`, `LIMIT_BAL`, `BILL_AMT1`, `AGE`
+- Подробные метрики: `reports/metrics/validation_metrics.json`
+- Визуализации: `reports/figures/`
 
+> Лучшей выбрана **CatBoost**, но нейросетевой пайплайн полностью поддерживается и может быть активирован через конфигурацию.
 
-## Быстрый старт
+## 📁 Структура проекта
+├── data/ # Управление данными
+│ ├── raw/ # Исходные данные
+│ ├── processed/ # Обработанные данные
+│ └── external/ # Внешние данные
+├── src/ # Исходный код
+│ ├── data/ # Валидация и препроцессинг
+│ ├── models/ # ML-пайплайны (включая нейросети)
+│ ├── api/ # FastAPI
+│ └── monitoring/ # Дрейф и мониторинг
+├── models/ # Обученные модели
+│ ├── best_model.pkl
+│ └── model_versions/
+├── reports/ # Метрики и визуализации
+├── notebooks/ # EDA и эксперименты
+├── scripts/ # Вспомогательные скрипты
+├── tests/ # Тесты
+├── infrastructure/ # Terraform + K8s для VK Cloud
+├── .github/workflows/ # CI/CD
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── requirements-*.txt
+└── README.md
 
-### Предварительные требования
+## 🛠 Быстрый старт (локально)
 
-- Python 3.9+
+### Требования
+- Python ≥ 3.9
 - Docker
 - Git
 
-## Установка
-
-1. **Клонируйте репозиторий**
+### Установка
 
 ```bash
-git clone <URL-репозитория>
-cd credit_default_prediction
-Создайте виртуальное окружение
+git clone https://github.com/bragind/client_defolt_project.git
+cd client_defolt_project
 
-```bash
 python -m venv venv
-source venv/bin/activate  # На Windows: venv\Scripts\activate
-Установите зависимости
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+pip install -r requirements-core.txt   # основные зависимости
+pip install -r requirements-dev.txt    # для разработки
+pip install -r requirements-docker.txt # для контейнеризации
+
+### Запуск пайплайна
 
 ```bash
-pip install -r requirements-core.txt #базовые зависимости
-pip instal -r requirements-dev.txt #для разработки
-pip install -r requirements-docker.txt #для контейнера
-Настройте DVC (опционально)
+make data      # загрузка и препроцессинг
+make train     # обучение модели
+make serve     # запуск API локально
+# ИЛИ
+python scripts/run_pipeline.py
 
-```bash
-dvc init
-dvc remote add -d myremote /path/to/remote/storage
+### Развертывание в VK Cloud
 
-### Загрузка данных
-```bash
-python scripts/download_data.py
-Использование тестовых данных
-```bash
-python scripts/create_sample_data.py
-### Предобработка данных
-```bash
-python src/data/preprocess.py
-### Валидация данных
-```bash
-python src/data/validation.py
+Проект готов к развёртыванию в VK Cloud Solutions:
 
-### Обучение моделей с трекингом в MLflow
-```bash
-python src/models/train.py
-### Просмотр экспериментов
-```bash
-mlflow ui --backend-store-uri sqlite:///mlflow.db
-### Откройте в браузере: http://localhost:5000
+Инфраструктура: infrastructure/terraform/ создаёт:
+Managed Kubernetes кластер
+VK Container Registry (cr.ru-7.vkcs.ru)
+Object Storage для DVC и Terraform state
+CI/CD: GitHub Actions автоматически:
+Собирает Docker-образ
+Пушит в VK CR
+Применяет terraform apply
+Деплоит в K8s через kubectl apply -k infrastructure/kubernetes/overlays/prod
 
-## Развертывание API
-### Сборка Docker образа
+### Ручное развёртывание
+
+Настройте infrastructure/terraform/terraform.tfvars
 ```bash
-docker build -t credit-default-api .
-### Запуск API локально
-```bash
-docker run -p 8000:8000 credit-default-api
-### Использование Docker Compose
-``` bash
-docker-compose up ml-api
-## Использование API
-###Проверка здоровья сервиса
+cd infrastructure/terraform
+terraform init && terraform apply
+kubectl apply -k infrastructure/kubernetes/overlays/prod
+
+###  REST API
+
+## Health check
 ```bash
 curl http://localhost:8000/health
-Ответ:
 
-json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00Z"
-}
-### Одиночный прогноз
+## Одиночный прогноз
+
 ```bash
 curl -X POST "http://localhost:8000/predict" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "LIMIT_BAL": 200000,
-       "SEX": 2,
-       "EDUCATION": 2,
-       "MARRIAGE": 1,
-       "AGE": 35,
-       "PAY_0": 2,
-       "PAY_2": 2,
-       "PAY_3": -1,
-       "PAY_4": -1,
-       "PAY_5": -2,
-       "PAY_6": -2,
-       "BILL_AMT1": 100000,
-       "BILL_AMT2": 120000,
-       "BILL_AMT3": 90000,
-       "BILL_AMT4": 80000,
-       "BILL_AMT5": 70000,
-       "BILL_AMT6": 60000,
-       "PAY_AMT1": 5000,
-       "PAY_AMT2": 4000,
-       "PAY_AMT3": 3000,
-       "PAY_AMT4": 2000,
-       "PAY_AMT5": 1000,
-       "PAY_AMT6": 5000
-     }'
-Ответ:
+  -H "Content-Type: application/json" \
+  -d '{"LIMIT_BAL": 200000, "SEX": 2, "EDUCATION": 2, ...}'
 
-json
-{
-  "prediction": 0,
-  "probability": 0.15,
-  "status": "success"
-}
-### Пакетный прогноз
 ```bash
 curl -X POST "http://localhost:8000/batch_predict" \
-     -H "Content-Type: application/json" \
-     -d '[{...}, {...}]'
-##Мониторинг
-###Запуск обнаружения дрейфа
+  -H "Content-Type: application/json" \
+  -d '[{...}, {...}]'
+
+## 🐳 Запуск в Docker
+
+```bash
+docker build -t credit-default-api .
+docker run -p 8000:8000 credit-default-api
+# ИЛИ
+docker-compose up ml-api
+
+## 🧪 Тестирование
+
+```bash
+pytest tests/ -v
+pytest --cov=src tests/
+make lint    # black + flake8 + mypy
+
+## 📈 Мониторинг
+
 ```bash
 python src/monitoring/drift_detection.py
-###Просмотр метрик
+
+Результаты: reports/metrics/drift_metrics.json, reports/figures/drift_analysis/
+
+## 📊 MLflow UI
+
 ```bash
-python src/monitoring/metrics_tracking.py
-## DVC Пайплайн
-### Запуск полного пайплайна
-```bash
-dvc repro
-###Просмотр графа пайплайна
-```bash
-dvc dag
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+# Открыть: http://localhost:5000
 
-## Тестирование
-Запуск юнит-тестов
-bash
-pytest tests/ -v
-Запуск с покрытием кода
-bash
-pytest --cov=src tests/
-Проверка качества кода
-bash
-
-## Форматирование кода
-black src/ tests/
-
-## Проверка стиля
-flake8 src/ tests/
-
-## Проверка типов
-mypy src/
-
-## Оценка модели
-Ключевые метрики отслеживаются в MLflow и сохраняются в директории reports/:
-ROC-AUC - Площадь под ROC-кривой
-Precision, Recall, F1-Score - Метрики классификации
-Feature Importance - Важность признаков
-Validation Reports - Отчеты валидации данных
-
-## Лицензия
-Этот проект создан в образовательных целях.
-
-# 1. Сборка и запуск API
-docker build -t credit-scoring-api .
-docker run -p 8000:8000 credit-scoring-api
-
-# 2. Запуск мониторинга дрифта
-python src/monitoring/drift_detector.py
-
-# 3. Запуск Airflow (опционально)
-airflow scheduler
-airflow webserver
+## 📜 Лицензия
+Проект создан в образовательных и демонстрационных целях.
