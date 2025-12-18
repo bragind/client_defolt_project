@@ -53,8 +53,12 @@ End-to-end MLOps-пайплайн для прогнозирования веро
 ├── scripts/ # Вспомогательные скрипты
 ├── tests/ # Тесты
 ├── infrastructure/ # Terraform + K8s для VK Cloud
+│ ├── docker
 │ ├── environments
-│ └── kubernets
+│ ├── kebernetes
+│ ├── modules
+│ ├── monitoring 
+│ └── terraform
 ├── .github/workflows/ # CI/CD
 ├── Dockerfile
 ├── docker-compose.yml
