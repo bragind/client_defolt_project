@@ -66,14 +66,14 @@ End-to-end MLOps-пайплайн для прогнозирования веро
 ├── requirements-*.txt
 └── README.md
 ```text
-
+```text
 ## 🛠 Быстрый старт (локально)
 
 ### Требования
 - Python ≥ 3.9
 - Docker
 - Git
-
+```text
 ### Установка
 
 ```bash
