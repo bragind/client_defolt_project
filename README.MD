@@ -102,6 +102,7 @@ python scripts/run_pipeline.py
 
 Проект готов к развёртыванию в VK Cloud Solutions:
 
+```text
 Инфраструктура: infrastructure/terraform/ создаёт:
 Managed Kubernetes кластер
 VK Container Registry (cr.ru-7.vkcs.ru)
@@ -111,7 +112,7 @@ CI/CD: GitHub Actions автоматически:
 Пушит в VK CR
 Применяет terraform apply
 Деплоит в K8s через kubectl apply -k infrastructure/kubernetes/overlays/prod
-
+```
 ### Ручное развёртывание
 
 Настройте infrastructure/terraform/terraform.tfvars
@@ -170,7 +171,7 @@ python src/monitoring/drift_detection.py
 ```bash
 mlflow ui --backend-store-uri sqlite:///mlflow.db
 ```
-# Открыть: http://localhost:5000
+Открыть: http://localhost:5000
 
 ## 📜 Лицензия
 Проект создан в образовательных и демонстрационных целях.
