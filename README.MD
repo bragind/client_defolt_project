@@ -65,15 +65,15 @@ End-to-end MLOps-пайплайн для прогнозирования веро
 ├── Makefile
 ├── requirements-*.txt
 └── README.md
-```text
-```text
+```
+
 ## 🛠 Быстрый старт (локально)
 
 ### Требования
 - Python ≥ 3.9
 - Docker
 - Git
-```text
+
 ### Установка
 
 ```bash
@@ -86,7 +86,7 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements-core.txt   # основные зависимости
 pip install -r requirements-dev.txt    # для разработки
 pip install -r requirements-docker.txt # для контейнеризации
-
+```
 ### Запуск пайплайна
 
 ```bash
