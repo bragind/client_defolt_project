@@ -34,8 +34,9 @@ End-to-end MLOps-пайплайн для прогнозирования веро
 
 > Лучшей выбрана **CatBoost**, но нейросетевой пайплайн полностью поддерживается и может быть активирован через конфигурацию.
 
-```text
 ## 📁 Структура проекта
+
+```text
 ├── data/ # Управление данными
 │ ├── raw/ # Исходные данные
 │ ├── processed/ # Обработанные данные
@@ -95,6 +96,7 @@ make train     # обучение модели
 make serve     # запуск API локально
 # ИЛИ
 python scripts/run_pipeline.py
+```
 
 ### Развертывание в VK Cloud
 
@@ -117,24 +119,26 @@ CI/CD: GitHub Actions автоматически:
 cd infrastructure/terraform
 terraform init && terraform apply
 kubectl apply -k infrastructure/kubernetes/overlays/prod
-
+```
 ###  REST API
 
 ## Health check
 ```bash
 curl http://localhost:8000/health
-
+```
 ## Одиночный прогноз
 
 ```bash
 curl -X POST "http://localhost:8000/predict" \
   -H "Content-Type: application/json" \
   -d '{"LIMIT_BAL": 200000, "SEX": 2, "EDUCATION": 2, ...}'
+```
 
 ```bash
 curl -X POST "http://localhost:8000/batch_predict" \
   -H "Content-Type: application/json" \
   -d '[{...}, {...}]'
+```
 
 ## 🐳 Запуск в Docker
 
@@ -143,6 +147,7 @@ docker build -t credit-default-api .
 docker run -p 8000:8000 credit-default-api
 # ИЛИ
 docker-compose up ml-api
+```
 
 ## 🧪 Тестирование
 
@@ -150,11 +155,13 @@ docker-compose up ml-api
 pytest tests/ -v
 pytest --cov=src tests/
 make lint    # black + flake8 + mypy
+```
 
 ## 📈 Мониторинг
 
 ```bash
 python src/monitoring/drift_detection.py
+```
 
 Результаты: reports/metrics/drift_metrics.json, reports/figures/drift_analysis/
 
@@ -162,6 +169,7 @@ python src/monitoring/drift_detection.py
 
 ```bash
 mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
 # Открыть: http://localhost:5000
 
 ## 📜 Лицензия
