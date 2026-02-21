@@ -1,0 +1,37 @@
+# client_defolt_project/Dockerfile.dev
+
+FROM python:3.12-slim
+
+# Установка системных зависимостей
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        make \
+        git \
+        curl \
+        wget \
+        ca-certificates \
+        build-essential \
+        && rm -rf /var/lib/apt/lists/*
+
+# Установка DVC
+RUN pip install "dvc[ssh,s3]"
+
+# Рабочая директория
+WORKDIR /app
+
+# Копируем зависимости первыми — для кэширования
+COPY requirements-core.txt .
+COPY requirements-dev.txt .
+RUN pip install -r requirements-core.txt -r requirements-dev.txt
+
+# Копируем весь проект
+COPY . .
+
+# Экспонируем порты
+EXPOSE 8000
+EXPOSE 9090
+EXPOSE 3000
+EXPOSE 8080
+
+# Запускаем bash по умолчанию — для интерактивной отладки
+CMD ["bash"]

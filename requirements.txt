@@ -1,6 +1,6 @@
 # ML и данные
 mlflow==2.13.1
-scikit-learn==1.4.0
+scikit-learn==1.2.2
 pandas==2.2.0
 numpy==1.24.3
 joblib==1.3.2
